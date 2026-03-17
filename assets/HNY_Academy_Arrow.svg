@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="art" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 234.91 13.96">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+        stroke: #fff;
+        stroke-miterlimit: 10;
+        stroke-width: 2px;
+      }
+
+      .cls-2 {
+        fill: #fff;
+        stroke-width: 0px;
+      }
+    </style>
+  </defs>
+  <line class="cls-1" y1="6.98" x2="224.87" y2="6.98"/>
+  <polygon class="cls-2" points="222.83 13.96 234.91 6.98 222.83 0 222.83 13.96"/>
+</svg>

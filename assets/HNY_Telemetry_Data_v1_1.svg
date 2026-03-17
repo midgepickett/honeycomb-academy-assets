@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="art" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 234.91 48.03">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+        stroke: #01487b;
+        stroke-dasharray: 0 0 8 6;
+        stroke-miterlimit: 10;
+        stroke-width: 2px;
+      }
+
+      .cls-2 {
+        fill: #0298ec;
+        stroke-width: 0px;
+      }
+    </style>
+  </defs>
+  <line class="cls-1" x1="1" y1="4" x2="235.92" y2="4"/>
+  <rect class="cls-2" x="23.02" width="20.31" height="8"/>
+  <rect class="cls-2" x="79.06" width="20.31" height="8"/>
+  <rect class="cls-2" x="163.13" width="20.31" height="8"/>
+  <line class="cls-1" x1="1" y1="24.02" x2="235.92" y2="24.02"/>
+  <rect class="cls-2" x="107.09" y="20.02" width="20.31" height="8"/>
+  <line class="cls-1" x1="1" y1="44.03" x2="235.92" y2="44.03"/>
+  <rect class="cls-2" x="50.64" y="40.03" width="20.31" height="8"/>
+  <rect class="cls-2" x="176.89" y="40.03" width="20.31" height="8"/>
+  <rect class="cls-2" x="204.81" y="20.02" width="20.31" height="8"/>
+</svg>
