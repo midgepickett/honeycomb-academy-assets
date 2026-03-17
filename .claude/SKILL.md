@@ -24,6 +24,10 @@ Never:
 - Use the default Claude diagram style (gray boxes, blue arrows)
 - Leave assets out when contextually appropriate
 - Truncate output — always write complete files
+- Use CSS filters (brightness, invert, etc.) to recolor assets — use them as-is or omit them
+- Place yellow-toned assets on Honey (#FFB000) or Amber (#F8AD00) backgrounds — they will blend in
+- Use italic text — use bold (font-weight: 500 for Roboto, 600 for Poppins) instead
+- Mix section widths within a single layout — all sections (tree, cards, strips) should share the same width
 
 ---
 

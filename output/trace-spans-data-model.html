@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Traces, Spans &amp; the Honeycomb Data Model</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Roboto:wght@400;500&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #f0f4f8;
+      display: flex;
+      justify-content: center;
+      padding: 40px;
+      min-height: 100vh;
+    }
+
+    .diagram {
+      background: #0278CD;
+      border-radius: 16px;
+      padding: 32px;
+      width: 1200px;
+      min-width: 1200px;
+    }
+
+    /* ── Header ──────────────────────────────────── */
+    .diagram-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+
+    .header-text { flex: 1; }
+
+    .header-tag {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2.5px;
+      color: #FFB000;
+      margin-bottom: 4px;
+    }
+
+    .header-title {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 26px;
+      color: #FFFFFF;
+    }
+
+    .header-logo {
+      height: 32px;
+    }
+
+    /* ── Trace ID bar ─────────────────────────────── */
+    .trace-bar {
+      background: #F8AD00;
+      border-radius: 10px;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 36px;
+    }
+
+    .trace-bar-bee {
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+
+    .trace-bar-label {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2.5px;
+      color: #25303E;
+      flex-shrink: 0;
+    }
+
+    .trace-bar-id {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 18px;
+      color: #25303E;
+    }
+
+    .trace-bar-desc {
+      font-family: 'Roboto', sans-serif;
+      font-weight: 500;
+      font-size: 11px;
+      color: #25303E;
+      opacity: 0.7;
+      margin-left: auto;
+    }
+
+    /* ── Span cards ───────────────────────────────── */
+    .span-card {
+      background: #01487B;
+      border-radius: 10px;
+      padding: 0 20px;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .span-card.grandchild-card {
+      background: #0160A4;
+    }
+
+    .span-tag {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #FFB000;
+      border: 1.5px solid #FFB000;
+      border-radius: 4px;
+      padding: 3px 7px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .span-info {
+      flex: 1;
+    }
+
+    .span-service {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      color: #FFFFFF;
+      margin-bottom: 3px;
+    }
+
+    .span-operation {
+      font-family: 'Roboto', sans-serif;
+      font-weight: 500;
+      font-size: 12px;
+      color: #93D1F2;
+    }
+
+    .entry-badge {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #0278CD;
+      background: #93D1F2;
+      border-radius: 4px;
+      padding: 4px 10px;
+      flex-shrink: 0;
+    }
+
+    /* ── Tree ─────────────────────────────────────── */
+    .tree-wrapper {
+      position: relative;
+      width: 100%;
+      margin-bottom: 36px;
+      height: 334px;
+    }
+
+    .tree-connectors {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 334px;
+      pointer-events: none;
+      overflow: visible;
+    }
+
+    .tree-node {
+      position: absolute;
+      z-index: 1;
+    }
+
+    /* ── Metadata row ─────────────────────────────── */
+    .metadata-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .meta-card {
+      background: #01487B;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .meta-card-body {
+      padding: 18px 20px 14px;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .meta-icon {
+      width: 44px;
+      height: 44px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+
+    .meta-info { flex: 1; }
+
+    .meta-tag {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 2.5px;
+      color: #FFB000;
+      margin-bottom: 5px;
+    }
+
+    .meta-name {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 13px;
+      color: #FFFFFF;
+      margin-bottom: 4px;
+    }
+
+    .meta-desc {
+      font-family: 'Roboto', sans-serif;
+      font-weight: 500;
+      font-size: 11px;
+      color: #93D1F2;
+    }
+
+    .meta-caption {
+      background: #25303E;
+      padding: 8px 14px;
+      font-family: 'Roboto', sans-serif;
+      font-weight: 500;
+      font-size: 10px;
+      color: #93D1F2;
+    }
+
+    /* ── Telemetry strip ──────────────────────────── */
+    .telemetry-strip {
+      border-radius: 8px;
+      overflow: hidden;
+      height: 26px;
+    }
+
+    .telemetry-strip img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="diagram">
+
+    <!-- Header -->
+    <div class="diagram-header">
+      <div class="header-text">
+        <div class="header-tag">Honeycomb Data Model</div>
+        <div class="header-title">Traces, Spans &amp; the Data Model</div>
+      </div>
+      <img
+        class="header-logo"
+        src="https://cdn.jsdelivr.net/gh/midgepickett/honeycomb-academy-assets@main/assets/HNY_ACDMY-Logo-Light-Large-NoPadding.png"
+        alt="Honeycomb Academy"
+      />
+    </div>
+
+    <!-- Trace ID bar -->
+    <div class="trace-bar">
+<span class="trace-bar-label">Trace ID</span>
+      <span class="trace-bar-id">abc-7f3d2e1c</span>
+      <span class="trace-bar-desc">All four spans share this identifier — it's what makes them a trace</span>
+    </div>
+
+    <!--
+      Tree coordinate plan (1136px wide = 1200px container - 64px padding):
+        Root:              top=0,   left=0,   width=1136, height=80 → bottom=80,  center-x=568
+        gap (connectors):  80–128  (48px)    junction at y=104
+        inventory-service: top=128, left=0,   width=538,  height=80 → bottom=208, center-x=269
+        payment-service:   top=128, left=598, width=538,  height=80 → bottom=208, center-x=867
+        gap (connectors):  208–244 (36px)    grandchild connector at x=867
+        postgres:          top=244, left=598, width=538,  height=80 → bottom=324, center-x=867
+        Total height: 324 + 10 buffer = 334
+    -->
+    <div class="tree-wrapper">
+
+      <svg
+        class="tree-connectors"
+        viewBox="0 0 1136 334"
+        preserveAspectRatio="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <!-- Root bottom → junction -->
+        <line x1="568" y1="80" x2="568" y2="104" stroke="#93D1F2" stroke-width="2"/>
+        <!-- Horizontal branch: inventory center ↔ payment center -->
+        <line x1="269" y1="104" x2="867" y2="104" stroke="#93D1F2" stroke-width="2"/>
+        <!-- Junction → inventory top -->
+        <line x1="269" y1="104" x2="269" y2="128" stroke="#93D1F2" stroke-width="2"/>
+        <!-- Junction → payment top -->
+        <line x1="867" y1="104" x2="867" y2="128" stroke="#93D1F2" stroke-width="2"/>
+        <!-- Payment bottom → postgres top -->
+        <line x1="867" y1="208" x2="867" y2="244" stroke="#93D1F2" stroke-width="2"/>
+        <!-- Junction dots -->
+        <circle cx="269" cy="104" r="3" fill="#93D1F2"/>
+        <circle cx="867" cy="104" r="3" fill="#93D1F2"/>
+        <circle cx="867" cy="208" r="3" fill="#93D1F2"/>
+      </svg>
+
+      <!-- Root span -->
+      <div class="tree-node" style="top: 0; left: 0; right: 0;">
+        <div class="span-card">
+          <span class="span-tag">Root Span</span>
+          <div class="span-info">
+            <div class="span-service">checkout-api</div>
+            <div class="span-operation">POST /checkout</div>
+          </div>
+          <span class="entry-badge">entry point</span>
+        </div>
+      </div>
+
+      <!-- inventory-service -->
+      <div class="tree-node" style="top: 128px; left: 0; width: 538px;">
+        <div class="span-card">
+          <span class="span-tag">Span</span>
+          <div class="span-info">
+            <div class="span-service">inventory-service</div>
+            <div class="span-operation">GET /stock-check</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- payment-service -->
+      <div class="tree-node" style="top: 128px; left: 598px; width: 538px;">
+        <div class="span-card">
+          <span class="span-tag">Span</span>
+          <div class="span-info">
+            <div class="span-service">payment-service</div>
+            <div class="span-operation">POST /charge</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- postgres (grandchild) -->
+      <div class="tree-node" style="top: 244px; left: 598px; width: 538px;">
+        <div class="span-card grandchild-card">
+          <span class="span-tag">Span</span>
+          <div class="span-info">
+            <div class="span-service">postgres</div>
+            <div class="span-operation">INSERT transactions</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Metadata cards -->
+    <div class="metadata-row">
+
+      <div class="meta-card">
+        <div class="meta-card-body">
+          <img
+            class="meta-icon"
+            src="https://cdn.jsdelivr.net/gh/midgepickett/honeycomb-academy-assets@main/assets/HNY_Academy-Trace_Waterfall.png"
+            alt="Dataset"
+          />
+          <div class="meta-info">
+            <div class="meta-tag">Dataset</div>
+            <div class="meta-name">checkout-service</div>
+            <div class="meta-desc">Events sharing the same schema</div>
+          </div>
+        </div>
+        <div class="meta-caption">Groups spans by shared structure and origin service</div>
+      </div>
+
+      <div class="meta-card">
+        <div class="meta-card-body">
+          <img
+            class="meta-icon"
+            src="https://cdn.jsdelivr.net/gh/midgepickett/honeycomb-academy-assets@main/assets/HNY_Academy-Otel_Telescope.png"
+            alt="Environment"
+          />
+          <div class="meta-info">
+            <div class="meta-tag">Environment</div>
+            <div class="meta-name">production</div>
+            <div class="meta-desc">Logical grouping of datasets</div>
+          </div>
+        </div>
+        <div class="meta-caption">Separates data by deployment context — production, staging, dev</div>
+      </div>
+
+    </div>
+
+    <!-- Telemetry strip -->
+    <div class="telemetry-strip">
+      <img
+        src="https://cdn.jsdelivr.net/gh/midgepickett/honeycomb-academy-assets@main/assets/HNY_Telemetry_Data_v1.png"
+        alt=""
+      />
+    </div>
+
+  </div>
+</body>
+</html>
